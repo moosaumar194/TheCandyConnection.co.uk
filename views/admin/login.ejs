@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %> — The Candy Connection</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700;800&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="/css/admin.css" />
+</head>
+<body class="admin-auth-body">
+  <div class="auth-card">
+    <div class="auth-logo" aria-hidden="true">🍬</div>
+    <h1>The Candy Connection</h1>
+    <p class="auth-sub">Admin Panel</p>
+
+    <% if (error) { %>
+      <div class="auth-error" role="alert"><%= error %></div>
+    <% } %>
+
+    <form method="post" action="/admin/login" autocomplete="off">
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" required autofocus />
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" required />
+      </div>
+      <button type="submit" class="btn btn-primary btn-block btn-lg">Log In</button>
+    </form>
+
+    <a class="auth-back" href="/">← Back to site</a>
+  </div>
+</body>
+</html>

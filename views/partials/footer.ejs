@@ -1,0 +1,46 @@
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-col footer-brand">
+      <div class="brand">
+        <span class="brand-emoji" aria-hidden="true">🍬</span>
+        <span class="brand-text">The Candy Connection</span>
+      </div>
+      <p class="footer-tagline">Sweet Deals. Bulk Delights.</p>
+      <p class="footer-note">Bulk candy wholesale — order easily on WhatsApp.</p>
+    </div>
+
+    <div class="footer-col">
+      <h4>Quick Links</h4>
+      <ul class="footer-links">
+        <li><a href="/">Home</a></li>
+        <li><a href="/catalog">Catalog</a></li>
+        <li><a href="/contact">Contact</a></li>
+        <li><a href="/reviews">Reviews</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-col">
+      <h4>Get in Touch</h4>
+      <ul class="footer-links">
+        <li>
+          <a href="<%= wa.buildWaLink(settings.whatsapp_number, wa.GENERIC_MESSAGE) %>" target="_blank" rel="noopener">
+            💬 <%= settings.whatsapp_number %>
+          </a>
+        </li>
+        <li><a href="mailto:<%= settings.email %>">✉️ <%= settings.email %></a></li>
+      </ul>
+      <div class="footer-socials">
+        <% if (settings.instagram_url) { %><a href="<%= settings.instagram_url %>" target="_blank" rel="noopener" aria-label="Instagram">Instagram</a><% } %>
+        <% if (settings.facebook_url) { %><a href="<%= settings.facebook_url %>" target="_blank" rel="noopener" aria-label="Facebook">Facebook</a><% } %>
+        <% if (settings.tiktok_url) { %><a href="<%= settings.tiktok_url %>" target="_blank" rel="noopener" aria-label="TikTok">TikTok</a><% } %>
+        <% if (settings.youtube_url) { %><a href="<%= settings.youtube_url %>" target="_blank" rel="noopener" aria-label="YouTube">YouTube</a><% } %>
+        <% if (settings.discord_url) { %><a href="<%= settings.discord_url %>" target="_blank" rel="noopener" aria-label="Discord">Discord</a><% } %>
+        <% if (settings.whatsapp_channel_url) { %><a href="<%= settings.whatsapp_channel_url %>" target="_blank" rel="noopener" aria-label="WhatsApp Channel">WhatsApp Channel</a><% } %>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-bottom">
+    <p>&copy; <%= currentYear %> The Candy Connection. All rights reserved.</p>
+  </div>
+</footer>

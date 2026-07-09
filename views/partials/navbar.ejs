@@ -1,0 +1,22 @@
+<nav class="navbar" id="navbar">
+  <div class="nav-inner">
+    <a href="/" class="brand" aria-label="The Candy Connection home">
+      <span class="brand-emoji" aria-hidden="true">🍬</span>
+      <span class="brand-text">The Candy&nbsp;Connection</span>
+    </a>
+
+    <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+
+    <div class="nav-links" id="navLinks">
+      <a href="/" class="<%= activeNav === 'home' ? 'active' : '' %>">Home</a>
+      <a href="/catalog" class="<%= activeNav === 'catalog' ? 'active' : '' %>">Catalog</a>
+      <a href="/contact" class="<%= activeNav === 'contact' ? 'active' : '' %>">Contact</a>
+      <a href="/reviews" class="<%= activeNav === 'reviews' ? 'active' : '' %>">Reviews</a>
+      <a href="<%= waFloat %>" class="btn btn-gold nav-wa" target="_blank" rel="noopener">
+        <span aria-hidden="true">💬</span> Order on WhatsApp
+      </a>
+    </div>
+  </div>
+</nav>

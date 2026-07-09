@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-label="No image available">
+  <defs>
+    <linearGradient id="p" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FFE9F1"/>
+      <stop offset="1" stop-color="#FFFACD"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="400" fill="url(#p)"/>
+  <g transform="translate(200 175)">
+    <path d="M-120 0 L-58 -36 L-58 36 Z" fill="#FFB6C1"/>
+    <path d="M120 0 L58 -36 L58 36 Z" fill="#FFB6C1"/>
+    <circle r="66" fill="#FF8FA3"/>
+    <circle r="66" fill="none" stroke="#ffffff" stroke-width="8" stroke-dasharray="16 12"/>
+    <ellipse cx="-20" cy="-20" rx="18" ry="12" fill="#ffffff" opacity="0.55"/>
+  </g>
+  <text x="200" y="300" text-anchor="middle" font-family="Poppins, Arial, sans-serif"
+        font-size="26" font-weight="700" fill="#B08">No Image</text>
+</svg>

@@ -1,0 +1,105 @@
+<%- include('partials/head') %>
+<%- include('partials/navbar') %>
+
+<main>
+  <section class="page-header">
+    <h1>Our Candy Collection</h1>
+    <p>Browse our selection and inquire via WhatsApp for bulk pricing.</p>
+  </section>
+
+  <div class="view-only-banner">
+    🛈 This catalog is for viewing only. To order, contact us on WhatsApp.
+  </div>
+
+  <section class="section catalog-section">
+    <!-- Category filter -->
+    <div class="filter-bar" role="group" aria-label="Filter by category">
+      <div class="filter-tabs" id="filterTabs">
+        <button type="button" class="filter-tab <%= selectedCategory === 'All' ? 'active' : '' %>" data-category="All" aria-pressed="<%= selectedCategory === 'All' ? 'true' : 'false' %>">All</button>
+        <% categories.forEach(function (cat) { %>
+          <button type="button" class="filter-tab <%= selectedCategory === cat.name ? 'active' : '' %>" data-category="<%= cat.name %>" aria-pressed="<%= selectedCategory === cat.name ? 'true' : 'false' %>">
+            <%= cat.name %>
+          </button>
+        <% }) %>
+      </div>
+    </div>
+
+    <!-- Search -->
+    <div class="search-wrap">
+      <span class="search-icon" aria-hidden="true">🔍</span>
+      <input type="search" id="productSearch" placeholder="Search candies..." aria-label="Search candies" autocomplete="off" />
+    </div>
+
+    <!-- Product grid -->
+    <h2 class="sr-only">Products</h2>
+    <div class="grid grid-products" id="productGrid">
+      <% products.forEach(function (p) { %>
+        <%
+          var waLink = wa.buildWaLink(settings.whatsapp_number, wa.productMessage(p.name));
+          var priceText = h.displayPrice(p.price);
+          var imgSrc = h.imageUrl(p.image_path);
+        %>
+        <article
+          class="product-card reveal"
+          data-id="<%= p.id %>"
+          data-name="<%= p.name %>"
+          data-category="<%= p.category || '' %>"
+          data-description="<%= p.description || '' %>"
+          data-packaging="<%= p.packaging || '' %>"
+          data-price="<%= priceText %>"
+          data-image="<%= imgSrc %>"
+          data-wa="<%= waLink %>"
+        >
+          <button type="button" class="product-img js-open-modal" aria-label="View details for <%= p.name %>">
+            <img src="<%= imgSrc %>" alt="" loading="lazy" />
+          </button>
+          <div class="product-body">
+            <% if (p.category) { %><span class="product-cat"><%= p.category %></span><% } %>
+            <h3 class="product-name"><%= p.name %></h3>
+            <p class="product-desc"><%= h.truncate(p.description, 90) %></p>
+            <% if (p.packaging) { %><p class="product-pack">📦 <%= p.packaging %></p><% } %>
+            <div class="product-foot">
+              <span class="product-price"><%= priceText %></span>
+              <a
+                class="btn btn-whatsapp btn-sm product-wa"
+                href="<%= waLink %>"
+                target="_blank"
+                rel="noopener"
+                onclick="event.stopPropagation()"
+              >💬 Inquire</a>
+            </div>
+          </div>
+        </article>
+      <% }) %>
+    </div>
+
+    <p class="empty-state" id="emptyState" <%= products.length ? 'hidden' : '' %>>
+      No candies found. Try another search!
+    </p>
+  </section>
+</main>
+
+<!-- Product detail modal -->
+<div class="modal-overlay" id="productModal" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalName">
+    <button class="modal-close" id="modalClose" aria-label="Close">&times;</button>
+    <div class="modal-img"><img id="modalImg" src="" alt="" /></div>
+    <div class="modal-body">
+      <span class="product-cat" id="modalCat"></span>
+      <h2 id="modalName"></h2>
+      <p id="modalDesc"></p>
+      <p class="modal-pack" id="modalPack"></p>
+      <p class="modal-price" id="modalPrice"></p>
+      <a class="btn btn-gold btn-lg btn-block" id="modalWa" href="#" target="_blank" rel="noopener">
+        💬 Order via WhatsApp
+      </a>
+    </div>
+  </div>
+</div>
+
+<%- include('partials/footer') %>
+<%- include('partials/whatsapp-float') %>
+<script src="/js/main.js"></script>
+<script src="/js/catalog.js"></script>
+</body>
+</html>

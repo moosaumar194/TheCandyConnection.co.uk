@@ -1,0 +1,107 @@
+<%- include('partials/head') %>
+<%- include('partials/navbar') %>
+
+<main>
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-candy" aria-hidden="true">
+      <span class="float-candy c1">🍬</span>
+      <span class="float-candy c2">🍭</span>
+      <span class="float-candy c3">🍫</span>
+      <span class="float-candy c4">🧁</span>
+      <span class="float-candy c5">🍩</span>
+      <span class="float-candy c6">🍪</span>
+    </div>
+    <div class="hero-inner">
+      <p class="hero-eyebrow">Bulk &amp; Wholesale Candy Supplier</p>
+      <h1 class="hero-title"><%= settings.hero_headline %></h1>
+      <p class="hero-sub"><%= settings.hero_subheadline %></p>
+      <div class="hero-cta">
+        <a href="/catalog" class="btn btn-primary btn-lg">View Our Catalog</a>
+        <a href="<%= waFloat %>" target="_blank" rel="noopener" class="btn btn-gold btn-lg">💬 Order on WhatsApp</a>
+      </div>
+      <p class="hero-note">🛈 Catalog is view-only — all orders are placed via WhatsApp.</p>
+    </div>
+  </section>
+
+  <!-- ABOUT SNIPPET -->
+  <section class="section about-snippet reveal">
+    <div class="about-icon" aria-hidden="true">🍭</div>
+    <div class="about-text">
+      <h2>Your Sweetest Bulk Connection</h2>
+      <p>
+        The Candy Connection supplies shops, events, and resellers with a huge variety of
+        candies at unbeatable bulk prices. From chocolates to gummies to nostalgic hard candy,
+        we make stocking up simple — just browse, then message us on WhatsApp for a quote.
+      </p>
+    </div>
+  </section>
+
+  <!-- FEATURED CATEGORIES -->
+  <section class="section">
+    <div class="section-head reveal">
+      <h2>Shop by Category</h2>
+      <p class="section-sub">Explore our most popular candy collections.</p>
+    </div>
+    <% if (featuredCategories.length === 0) { %>
+      <p class="empty-state">Categories are coming soon!</p>
+    <% } else { %>
+      <div class="grid grid-cards">
+        <% featuredCategories.forEach(function (cat) { %>
+          <a class="category-card reveal" href="/catalog?category=<%= encodeURIComponent(cat.name) %>">
+            <div class="category-card-img">
+              <img src="<%= h.imageUrl(cat.image_path) %>" alt="<%= cat.name %>" loading="lazy" />
+            </div>
+            <div class="category-card-body">
+              <h3><%= cat.name %></h3>
+              <span class="btn btn-outline btn-sm">Browse →</span>
+            </div>
+          </a>
+        <% }) %>
+      </div>
+    <% } %>
+  </section>
+
+  <!-- WHY CHOOSE US -->
+  <section class="section why-section">
+    <div class="section-head reveal">
+      <h2>Why Choose Us</h2>
+      <p class="section-sub">B2B candy supply made sweet and simple.</p>
+    </div>
+    <div class="grid grid-why">
+      <div class="why-card reveal">
+        <div class="why-icon" aria-hidden="true">🏷️</div>
+        <h3>Bulk Pricing</h3>
+        <p>Wholesale rates that keep your margins sweet, whatever the order size.</p>
+      </div>
+      <div class="why-card reveal">
+        <div class="why-icon" aria-hidden="true">🍬</div>
+        <h3>Wide Variety</h3>
+        <p>Hundreds of candies across chocolates, gummies, hard candy and more.</p>
+      </div>
+      <div class="why-card reveal">
+        <div class="why-icon" aria-hidden="true">🚚</div>
+        <h3>Reliable Delivery</h3>
+        <p>Dependable supply so your shelves and counters are never empty.</p>
+      </div>
+      <div class="why-card reveal">
+        <div class="why-icon" aria-hidden="true">🎁</div>
+        <h3>Custom Orders</h3>
+        <p>Tell us your perfect pick-and-mix and we'll put it together for you.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA BANNER -->
+  <section class="cta-banner reveal">
+    <h2>Ready to stock up?</h2>
+    <p>Message us on WhatsApp and we'll help you build the perfect bulk order.</p>
+    <a href="<%= waFloat %>" target="_blank" rel="noopener" class="btn btn-gold btn-lg">💬 Chat on WhatsApp</a>
+  </section>
+</main>
+
+<%- include('partials/footer') %>
+<%- include('partials/whatsapp-float') %>
+<script src="/js/main.js"></script>
+</body>
+</html>

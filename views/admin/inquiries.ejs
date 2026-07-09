@@ -1,0 +1,44 @@
+<%- include('partials/head') %>
+
+<div class="panel">
+  <div class="panel-head">
+    <h2 class="panel-title">Inbox (<%= inquiries.length %>)</h2>
+    <span class="panel-hint">Messages from the contact form.</span>
+  </div>
+
+  <% if (inquiries.length === 0) { %>
+    <p class="empty-state">No messages yet.</p>
+  <% } else { %>
+    <div class="table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr><th>Status</th><th>Name</th><th>Contact</th><th>Message</th><th>Date</th><th class="col-actions">Actions</th></tr>
+        </thead>
+        <tbody>
+          <% inquiries.forEach(function (i) { %>
+            <tr class="<%= i.is_read ? '' : 'row-unread' %>">
+              <td><span class="badge <%= i.is_read ? 'badge-muted' : 'badge-count' %>"><%= i.is_read ? 'Read' : 'New' %></span></td>
+              <td class="cell-name"><%= i.name %></td>
+              <td>
+                <% if (i.email) { %><a href="mailto:<%= i.email %>"><%= i.email %></a><br /><% } %>
+                <% if (i.phone) { %><span class="muted"><%= i.phone %></span><% } %>
+              </td>
+              <td class="cell-review"><%= i.message %></td>
+              <td><%= h.formatDate(i.created_at) %></td>
+              <td class="actions-cell">
+                <form method="post" action="/admin/inquiries/<%= i.id %>/read" class="inline-form">
+                  <button type="submit" class="btn btn-sm btn-outline"><%= i.is_read ? 'Mark unread' : 'Mark read' %></button>
+                </form>
+                <form method="post" action="/admin/inquiries/<%= i.id %>/delete" class="inline-form" data-confirm="Delete this message?">
+                  <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                </form>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+</div>
+
+<%- include('partials/foot') %>

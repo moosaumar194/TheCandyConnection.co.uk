@@ -1,0 +1,6 @@
+<% if (locals.flash && flash.message) { %>
+  <div class="flash flash-<%= flash.type || 'info' %>" role="status">
+    <span><%= flash.message %></span>
+    <button type="button" class="flash-close" aria-label="Dismiss">&times;</button>
+  </div>
+<% } %>

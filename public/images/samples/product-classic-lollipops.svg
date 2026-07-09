@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-label="Lollipops">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FFE0EC"/>
+      <stop offset="1" stop-color="#FF9EC0"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="400" fill="url(#g)"/>
+  <circle cx="60" cy="70" r="10" fill="#ffffff" opacity="0.4"/>
+  <circle cx="340" cy="110" r="7" fill="#ffffff" opacity="0.4"/>
+  <circle cx="320" cy="330" r="12" fill="#ffffff" opacity="0.35"/>
+  <circle cx="70" cy="320" r="8" fill="#ffffff" opacity="0.4"/>
+  
+      <g transform="translate(200 175)">
+        <rect x="-6" y="40" width="12" height="120" rx="6" fill="#ffffff"/>
+        <circle r="78" fill="#FF4D8D"/>
+        <path d="M0 0 m0 -78 a78 78 0 0 1 0 156" fill="#FFFFFF" opacity="0.55"/>
+        <circle r="78" fill="none" stroke="#FFFFFF" stroke-width="6"/>
+        <ellipse cx="-22" cy="-24" rx="20" ry="13" fill="#ffffff" opacity="0.6"/>
+      </g>
+  <rect x="40" y="330" width="320" height="46" rx="23" fill="#2D2D2D" opacity="0.82"/>
+  <text x="200" y="362" text-anchor="middle" font-family="Poppins, Nunito, Arial, sans-serif"
+        font-size="24" font-weight="700" fill="#ffffff">Lollipops</text>
+</svg>

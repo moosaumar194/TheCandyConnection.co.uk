@@ -1,0 +1,21 @@
+<aside class="admin-sidebar" id="adminSidebar">
+  <div class="sidebar-brand">
+    <span class="brand-emoji" aria-hidden="true">🍬</span>
+    <span>Candy Admin</span>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="/admin/dashboard" class="<%= active === 'dashboard' ? 'active' : '' %>"><span aria-hidden="true">📊</span> Dashboard</a>
+    <a href="/admin/catalog" class="<%= active === 'catalog' ? 'active' : '' %>"><span aria-hidden="true">🍭</span> Catalog Manager</a>
+    <a href="/admin/categories" class="<%= active === 'categories' ? 'active' : '' %>"><span aria-hidden="true">🗂️</span> Categories</a>
+    <a href="/admin/reviews" class="<%= active === 'reviews' ? 'active' : '' %>"><span aria-hidden="true">⭐</span> Reviews</a>
+    <a href="/admin/inquiries" class="<%= active === 'inquiries' ? 'active' : '' %>"><span aria-hidden="true">📬</span> Inbox</a>
+    <a href="/admin/settings" class="<%= active === 'settings' ? 'active' : '' %>"><span aria-hidden="true">⚙️</span> Site Settings</a>
+  </nav>
+  <div class="sidebar-foot">
+    <a href="/" target="_blank" rel="noopener" class="sidebar-viewsite"><span aria-hidden="true">🌐</span> View Site</a>
+    <form method="post" action="/admin/logout">
+      <button type="submit" class="sidebar-logout"><span aria-hidden="true">🚪</span> Logout</button>
+    </form>
+  </div>
+</aside>
+<div class="sidebar-backdrop" id="sidebarBackdrop"></div>

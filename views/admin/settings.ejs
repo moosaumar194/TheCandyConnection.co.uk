@@ -1,0 +1,74 @@
+<%- include('partials/head') %>
+
+<form method="post" action="/admin/settings" class="admin-form">
+  <div class="panel">
+    <h2 class="panel-title">Contact Details</h2>
+    <div class="form-row">
+      <div class="form-group">
+        <label for="whatsapp_number">WhatsApp Number</label>
+        <input type="text" id="whatsapp_number" name="whatsapp_number" value="<%= settings.whatsapp_number %>" />
+        <small class="field-hint">International format, digits only (no +, spaces or dashes). e.g. 15551234567</small>
+      </div>
+      <div class="form-group">
+        <label for="email">Email Address</label>
+        <input type="email" id="email" name="email" value="<%= settings.email %>" />
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="address">Business Address</label>
+      <input type="text" id="address" name="address" value="<%= settings.address %>" />
+    </div>
+    <div class="form-group">
+      <label for="operating_hours">Operating Hours</label>
+      <textarea id="operating_hours" name="operating_hours" rows="3"><%= settings.operating_hours %></textarea>
+      <small class="field-hint">One line per day is fine — line breaks are preserved.</small>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2 class="panel-title">Social Media</h2>
+    <div class="form-group">
+      <label for="facebook_url">Facebook URL</label>
+      <input type="url" id="facebook_url" name="facebook_url" value="<%= settings.facebook_url %>" />
+    </div>
+    <div class="form-group">
+      <label for="instagram_url">Instagram URL</label>
+      <input type="url" id="instagram_url" name="instagram_url" value="<%= settings.instagram_url %>" />
+    </div>
+    <div class="form-group">
+      <label for="tiktok_url">TikTok URL</label>
+      <input type="url" id="tiktok_url" name="tiktok_url" value="<%= settings.tiktok_url %>" />
+    </div>
+    <div class="form-group">
+      <label for="youtube_url">YouTube URL</label>
+      <input type="url" id="youtube_url" name="youtube_url" value="<%= settings.youtube_url %>" />
+    </div>
+    <div class="form-group">
+      <label for="discord_url">Discord URL</label>
+      <input type="url" id="discord_url" name="discord_url" value="<%= settings.discord_url %>" />
+    </div>
+    <div class="form-group">
+      <label for="whatsapp_channel_url">WhatsApp Channel URL</label>
+      <input type="url" id="whatsapp_channel_url" name="whatsapp_channel_url" value="<%= settings.whatsapp_channel_url %>" />
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2 class="panel-title">Homepage Hero</h2>
+    <div class="form-group">
+      <label for="hero_headline">Hero Headline</label>
+      <input type="text" id="hero_headline" name="hero_headline" value="<%= settings.hero_headline %>" />
+    </div>
+    <div class="form-group">
+      <label for="hero_subheadline">Hero Subheadline</label>
+      <input type="text" id="hero_subheadline" name="hero_subheadline" value="<%= settings.hero_subheadline %>" />
+    </div>
+  </div>
+
+  <div class="form-actions sticky-actions">
+    <button type="submit" class="btn btn-primary btn-lg">💾 Save Settings</button>
+    <a href="/admin/change-password" class="btn btn-outline btn-lg">Change Password</a>
+  </div>
+</form>
+
+<%- include('partials/foot') %>

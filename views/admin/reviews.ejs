@@ -1,0 +1,133 @@
+<%- include('partials/head') %>
+
+<div class="tabs">
+  <a href="/admin/reviews?tab=pending" class="tab <%= tab === 'pending' ? 'active' : '' %>">
+    Pending <span class="tab-count"><%= pending.length %></span>
+  </a>
+  <a href="/admin/reviews?tab=approved" class="tab <%= tab === 'approved' ? 'active' : '' %>">
+    Approved <span class="tab-count"><%= approved.length %></span>
+  </a>
+</div>
+
+<%
+  function starStr(rating) {
+    var sc = h.starCounts(rating);
+    return '★'.repeat(sc.full) + '☆'.repeat(sc.empty);
+  }
+%>
+
+<% if (tab === 'pending') { %>
+  <div class="panel">
+    <h2 class="panel-title">Pending Reviews</h2>
+    <% if (pending.length === 0) { %>
+      <p class="empty-state">No pending reviews. 🎉</p>
+    <% } else { %>
+      <div class="table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr><th>Name</th><th>Rating</th><th>Review</th><th>Date</th><th class="col-actions">Actions</th></tr>
+          </thead>
+          <tbody>
+            <% pending.forEach(function (r) { %>
+              <tr>
+                <td class="cell-name"><%= r.customer_name %></td>
+                <td class="stars"><%= starStr(r.rating) %></td>
+                <td class="cell-review"><%= r.review_text %></td>
+                <td><%= h.formatDate(r.created_at) %></td>
+                <td class="actions-cell">
+                  <form method="post" action="/admin/reviews/<%= r.id %>/approve" class="inline-form">
+                    <button type="submit" class="btn btn-sm btn-success" title="Approve">✓ Approve</button>
+                  </form>
+                  <button type="button" class="btn btn-sm btn-outline js-edit-review"
+                    data-id="<%= r.id %>" data-name="<%= r.customer_name %>" data-rating="<%= r.rating %>"
+                    data-text="<%= r.review_text %>" data-verified="<%= r.is_verified %>" data-status="pending">Edit</button>
+                  <form method="post" action="/admin/reviews/<%= r.id %>/reject" class="inline-form" data-confirm="Reject and delete this review?">
+                    <button type="submit" class="btn btn-sm btn-danger" title="Reject">✗ Reject</button>
+                  </form>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    <% } %>
+  </div>
+<% } else { %>
+  <div class="panel">
+    <h2 class="panel-title">Approved Reviews</h2>
+    <% if (approved.length === 0) { %>
+      <p class="empty-state">No approved reviews yet.</p>
+    <% } else { %>
+      <div class="table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr><th>Name</th><th>Rating</th><th>Review</th><th>Verified</th><th>Date</th><th class="col-actions">Actions</th></tr>
+          </thead>
+          <tbody>
+            <% approved.forEach(function (r) { %>
+              <tr>
+                <td class="cell-name"><%= r.customer_name %></td>
+                <td class="stars"><%= starStr(r.rating) %></td>
+                <td class="cell-review"><%= r.review_text %></td>
+                <td>
+                  <form method="post" action="/admin/reviews/<%= r.id %>/verified" class="inline-form">
+                    <button type="submit" class="badge <%= r.is_verified ? 'badge-verified' : 'badge-muted' %>" title="Toggle verified">
+                      <%= r.is_verified ? '✔ Verified' : 'Not verified' %>
+                    </button>
+                  </form>
+                </td>
+                <td><%= h.formatDate(r.created_at) %></td>
+                <td class="actions-cell">
+                  <button type="button" class="btn btn-sm btn-outline js-edit-review"
+                    data-id="<%= r.id %>" data-name="<%= r.customer_name %>" data-rating="<%= r.rating %>"
+                    data-text="<%= r.review_text %>" data-verified="<%= r.is_verified %>" data-status="approved">Edit</button>
+                  <form method="post" action="/admin/reviews/<%= r.id %>/delete" class="inline-form" data-confirm="Delete this review permanently?">
+                    <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                  </form>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    <% } %>
+  </div>
+<% } %>
+
+<!-- Edit review modal -->
+<div class="modal-overlay" id="reviewModal" hidden>
+  <div class="modal admin-modal" role="dialog" aria-modal="true" aria-labelledby="reviewModalTitle">
+    <button class="modal-close" id="reviewModalClose" aria-label="Close">&times;</button>
+    <h2 id="reviewModalTitle">Edit Review</h2>
+    <form method="post" id="reviewEditForm" class="admin-form">
+      <input type="hidden" name="status" id="rev-status" />
+      <div class="form-group">
+        <label for="rev-name">Name</label>
+        <input type="text" id="rev-name" name="customer_name" required />
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="rev-rating">Rating</label>
+          <select id="rev-rating" name="rating">
+            <% [5,4,3,2,1].forEach(function (n) { %><option value="<%= n %>"><%= n %> star<%= n===1?'':'s' %></option><% }) %>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="checkbox-row" style="margin-top: 1.8rem;">
+            <input type="checkbox" id="rev-verified" name="is_verified" value="1" /> Verified purchase
+          </label>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="rev-text">Review</label>
+        <textarea id="rev-text" name="review_text" rows="4" required></textarea>
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+        <button type="button" class="btn btn-outline" id="reviewModalCancel">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<%- include('partials/foot') %>

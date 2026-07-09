@@ -1,0 +1,52 @@
+<%- include('partials/head') %>
+
+<div class="panel">
+  <div class="panel-head">
+    <h2 class="panel-title">Products (<%= products.length %>)</h2>
+    <a href="/admin/catalog/new" class="btn btn-primary">➕ Add New Product</a>
+  </div>
+
+  <% if (products.length === 0) { %>
+    <p class="empty-state">No products yet. Add your first product to get started!</p>
+  <% } else { %>
+    <div class="table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Image</th>
+            <th>Name</th>
+            <th>Category</th>
+            <th>Price</th>
+            <th>Visible</th>
+            <th class="col-actions">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% products.forEach(function (p) { %>
+            <tr class="<%= p.is_visible ? '' : 'row-hidden' %>">
+              <td><img class="table-thumb" src="<%= h.imageUrl(p.image_path) %>" alt="<%= p.name %>" /></td>
+              <td class="cell-name"><%= p.name %></td>
+              <td><%= p.category || '—' %></td>
+              <td><%= h.displayPrice(p.price) %></td>
+              <td>
+                <form method="post" action="/admin/catalog/<%= p.id %>/visibility" class="inline-form">
+                  <button type="submit" class="toggle <%= p.is_visible ? 'on' : 'off' %>" title="<%= p.is_visible ? 'Visible — click to hide' : 'Hidden — click to show' %>" aria-label="Toggle visibility">
+                    <span class="toggle-knob"></span>
+                  </button>
+                </form>
+              </td>
+              <td class="actions-cell">
+                <a href="/admin/catalog/<%= p.id %>/edit" class="btn btn-sm btn-outline">Edit</a>
+                <form method="post" action="/admin/catalog/<%= p.id %>/delete" class="inline-form" data-confirm="Delete &quot;<%= p.name %>&quot;? This cannot be undone.">
+                  <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                </form>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+</div>
+
+<%- include('partials/foot') %>

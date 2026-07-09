@@ -1,0 +1,10 @@
+<header class="admin-topbar">
+  <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle menu" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
+  <h1 class="topbar-title"><%= title %></h1>
+  <div class="topbar-user">
+    <span class="topbar-welcome">Welcome, <%= admin.username || 'Admin' %></span>
+    <div class="topbar-avatar" aria-hidden="true"><%= (admin.username || 'A').charAt(0).toUpperCase() %></div>
+  </div>
+</header>

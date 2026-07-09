@@ -1,0 +1,104 @@
+<%- include('partials/head') %>
+<%- include('partials/navbar') %>
+
+<main>
+  <section class="page-header">
+    <h1>Get in Touch — Bulk Orders Welcome</h1>
+    <p>Questions or ready to order? We're just a message away.</p>
+  </section>
+
+  <section class="section">
+    <h2 class="sr-only">Ways to reach us</h2>
+    <div class="grid grid-contact">
+      <!-- WhatsApp -->
+      <div class="contact-card reveal">
+        <div class="contact-icon wa" aria-hidden="true">💬</div>
+        <h3>WhatsApp</h3>
+        <p class="contact-detail"><%= settings.whatsapp_number %></p>
+        <p class="contact-hint">Fastest way to get a quote.</p>
+        <a href="<%= wa.buildWaLink(settings.whatsapp_number, wa.GENERIC_MESSAGE) %>" target="_blank" rel="noopener" class="btn btn-whatsapp">Chat Now</a>
+      </div>
+
+      <!-- Email -->
+      <div class="contact-card reveal">
+        <div class="contact-icon email" aria-hidden="true">✉️</div>
+        <h3>Email</h3>
+        <p class="contact-detail"><%= settings.email %></p>
+        <p class="contact-hint">For detailed enquiries.</p>
+        <a href="mailto:<%= settings.email %>" class="btn btn-outline">Send Email</a>
+      </div>
+
+      <!-- Location / Hours -->
+      <div class="contact-card reveal">
+        <div class="contact-icon loc" aria-hidden="true">📍</div>
+        <h3>Visit / Hours</h3>
+        <p class="contact-detail"><%= settings.address %></p>
+        <p class="contact-hours"><%= settings.operating_hours %></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section contact-form-section">
+    <div class="section-head reveal">
+      <h2>Send Us a Message</h2>
+      <p class="section-sub">Prefer to write? Fill in the form and we'll get back to you.</p>
+    </div>
+
+    <form id="contactForm" class="form-card reveal" novalidate>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="cf-name">Name *</label>
+          <input type="text" id="cf-name" name="name" required />
+        </div>
+        <div class="form-group">
+          <label for="cf-email">Email *</label>
+          <input type="email" id="cf-email" name="email" required />
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="cf-phone">Phone</label>
+        <input type="tel" id="cf-phone" name="phone" />
+      </div>
+      <div class="form-group">
+        <label for="cf-message">Message *</label>
+        <textarea id="cf-message" name="message" rows="5" required></textarea>
+      </div>
+      <div class="form-feedback" id="cf-feedback" role="status" aria-live="polite"></div>
+      <button type="submit" class="btn btn-primary btn-lg">Send Message</button>
+    </form>
+  </section>
+
+  <!-- Social -->
+  <section class="section social-section reveal">
+    <h2>Follow Us</h2>
+    <div class="social-links">
+      <% if (settings.instagram_url) { %><a href="<%= settings.instagram_url %>" target="_blank" rel="noopener" class="social-pill">📸 Instagram</a><% } %>
+      <% if (settings.facebook_url) { %><a href="<%= settings.facebook_url %>" target="_blank" rel="noopener" class="social-pill">👍 Facebook</a><% } %>
+      <% if (settings.tiktok_url) { %><a href="<%= settings.tiktok_url %>" target="_blank" rel="noopener" class="social-pill">🎵 TikTok</a><% } %>
+      <% if (settings.youtube_url) { %><a href="<%= settings.youtube_url %>" target="_blank" rel="noopener" class="social-pill">▶️ YouTube</a><% } %>
+      <% if (settings.discord_url) { %><a href="<%= settings.discord_url %>" target="_blank" rel="noopener" class="social-pill">🎮 Discord</a><% } %>
+      <% if (settings.whatsapp_channel_url) { %><a href="<%= settings.whatsapp_channel_url %>" target="_blank" rel="noopener" class="social-pill">📢 WhatsApp Channel</a><% } %>
+    </div>
+  </section>
+
+  <!-- Map -->
+  <section class="section map-section reveal">
+    <div class="map-embed">
+      <iframe
+        title="Our location"
+        width="100%"
+        height="320"
+        style="border:0"
+        loading="lazy"
+        referrerpolicy="no-referrer-when-downgrade"
+        src="https://www.google.com/maps?q=<%= encodeURIComponent(settings.address) %>&output=embed"
+      ></iframe>
+    </div>
+  </section>
+</main>
+
+<%- include('partials/footer') %>
+<%- include('partials/whatsapp-float') %>
+<script src="/js/main.js"></script>
+</body>
+</html>

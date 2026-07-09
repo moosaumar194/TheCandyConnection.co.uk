@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-label="Mix">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FFE9F5"/>
+      <stop offset="1" stop-color="#FFC1E3"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="400" fill="url(#g)"/>
+  <circle cx="60" cy="70" r="10" fill="#ffffff" opacity="0.4"/>
+  <circle cx="340" cy="110" r="7" fill="#ffffff" opacity="0.4"/>
+  <circle cx="320" cy="330" r="12" fill="#ffffff" opacity="0.35"/>
+  <circle cx="70" cy="320" r="8" fill="#ffffff" opacity="0.4"/>
+  
+      <g transform="translate(200 190)">
+        <path d="M-150 0 L-70 -45 L-70 45 Z" fill="#FF5FA2"/>
+        <path d="M150 0 L70 -45 L70 45 Z" fill="#FF5FA2"/>
+        <circle r="80" fill="#FF5FA2"/>
+        <circle r="80" fill="none" stroke="#66D2A0" stroke-width="10" stroke-dasharray="20 16"/>
+        <ellipse cx="-25" cy="-25" rx="24" ry="16" fill="#ffffff" opacity="0.55"/>
+      </g>
+  <rect x="40" y="330" width="320" height="46" rx="23" fill="#2D2D2D" opacity="0.82"/>
+  <text x="200" y="362" text-anchor="middle" font-family="Poppins, Nunito, Arial, sans-serif"
+        font-size="24" font-weight="700" fill="#ffffff">Mix</text>
+</svg>

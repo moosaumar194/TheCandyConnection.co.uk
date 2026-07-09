@@ -1,0 +1,107 @@
+<%- include('partials/head') %>
+<%- include('partials/navbar') %>
+
+<main>
+  <section class="page-header">
+    <h1>What Our Customers Say</h1>
+    <p>Real feedback from the shops and resellers we supply.</p>
+  </section>
+
+  <section class="section">
+    <!-- Stats bar -->
+    <div class="review-stats reveal">
+      <div class="stat-average">
+        <div class="stat-number"><%= stats.count ? stats.average.toFixed(1) : '—' %></div>
+        <% var avg = h.starCounts(stats.average); %>
+        <div class="stars stars-lg" aria-label="Average <%= stats.average.toFixed(1) %> out of 5">
+          <% for (var i = 0; i < avg.full; i++) { %>★<% } %><% for (var j = 0; j < avg.empty; j++) { %>☆<% } %>
+        </div>
+        <div class="stat-count"><%= stats.count %> review<%= stats.count === 1 ? '' : 's' %></div>
+      </div>
+      <div class="stat-distribution">
+        <% [5, 4, 3, 2, 1].forEach(function (star) {
+             var c = stats.distribution[star];
+             var pct = stats.count ? Math.round((c / stats.count) * 100) : 0; %>
+          <div class="dist-row">
+            <span class="dist-label"><%= star %> ★</span>
+            <div class="dist-bar"><div class="dist-fill" style="width: <%= pct %>%"></div></div>
+            <span class="dist-count"><%= c %></span>
+          </div>
+        <% }) %>
+      </div>
+    </div>
+
+    <!-- Reviews grid -->
+    <h2 class="sr-only">Customer reviews</h2>
+    <% if (reviews.length === 0) { %>
+      <p class="empty-state">No reviews yet — be the first to leave one below!</p>
+    <% } else { %>
+      <div class="grid grid-reviews">
+        <% reviews.forEach(function (r) { var sc = h.starCounts(r.rating); %>
+          <article class="review-card reveal">
+            <div class="review-head">
+              <div class="review-avatar" aria-hidden="true"><%= (r.customer_name || '?').trim().charAt(0).toUpperCase() %></div>
+              <div>
+                <h3 class="review-name"><%= r.customer_name %></h3>
+                <span class="stars" aria-label="<%= r.rating %> out of 5 stars">
+                  <% for (var i = 0; i < sc.full; i++) { %>★<% } %><% for (var j = 0; j < sc.empty; j++) { %>☆<% } %>
+                </span>
+              </div>
+            </div>
+            <p class="review-text"><%= r.review_text %></p>
+            <div class="review-foot">
+              <span class="review-date"><%= h.formatDate(r.created_at) %></span>
+              <% if (r.is_verified) { %><span class="badge badge-verified">✔ Verified Purchase</span><% } %>
+            </div>
+          </article>
+        <% }) %>
+      </div>
+    <% } %>
+  </section>
+
+  <!-- Leave a review -->
+  <section class="section leave-review-section">
+    <div class="section-head reveal">
+      <h2>Leave a Review</h2>
+      <p class="section-sub">We'd love to hear about your experience.</p>
+    </div>
+
+    <form id="reviewForm" class="form-card reveal" novalidate>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="rv-name">Name *</label>
+          <input type="text" id="rv-name" name="customer_name" required />
+        </div>
+        <div class="form-group">
+          <label for="rv-email">Email *</label>
+          <input type="email" id="rv-email" name="email" required />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Your Rating *</label>
+        <div class="star-input" id="starInput" role="group" aria-label="Star rating">
+          <% for (var s = 1; s <= 5; s++) { %>
+            <button type="button" class="star-btn" data-value="<%= s %>" aria-label="<%= s %> star<%= s === 1 ? '' : 's' %>">☆</button>
+          <% } %>
+        </div>
+        <input type="hidden" name="rating" id="ratingValue" value="" />
+      </div>
+
+      <div class="form-group">
+        <label for="rv-text">Your Review *</label>
+        <textarea id="rv-text" name="review_text" rows="5" required minlength="10" placeholder="Tell us what you loved…"></textarea>
+      </div>
+
+      <div class="form-feedback" id="rv-feedback" role="status" aria-live="polite"></div>
+      <button type="submit" class="btn btn-primary btn-lg">Submit Review</button>
+    </form>
+  </section>
+</main>
+
+<%- include('partials/footer') %>
+<%- include('partials/whatsapp-float') %>
+<script src="/js/main.js"></script>
+<script src="/js/reviews.js"></script>
+</body>
+</html>

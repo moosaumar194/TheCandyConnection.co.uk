@@ -1,0 +1,46 @@
+<%- include('partials/head') %>
+
+<div class="stat-grid">
+  <a class="stat-card" href="/admin/catalog">
+    <div class="stat-card-icon">🍭</div>
+    <div class="stat-card-value"><%= stats.products %></div>
+    <div class="stat-card-label">Total Products</div>
+  </a>
+
+  <a class="stat-card" href="/admin/categories">
+    <div class="stat-card-icon">🗂️</div>
+    <div class="stat-card-value"><%= stats.categories %></div>
+    <div class="stat-card-label">Categories</div>
+  </a>
+
+  <a class="stat-card <%= stats.pendingReviews > 0 ? 'stat-highlight' : '' %>" href="/admin/reviews?tab=pending">
+    <div class="stat-card-icon">⏳</div>
+    <div class="stat-card-value"><%= stats.pendingReviews %></div>
+    <div class="stat-card-label">Pending Reviews</div>
+    <% if (stats.pendingReviews > 0) { %><span class="stat-badge">Needs attention</span><% } %>
+  </a>
+
+  <a class="stat-card" href="/admin/reviews?tab=approved">
+    <div class="stat-card-icon">⭐</div>
+    <div class="stat-card-value"><%= stats.approvedReviews %></div>
+    <div class="stat-card-label">Approved Reviews</div>
+  </a>
+
+  <a class="stat-card <%= stats.unreadInquiries > 0 ? 'stat-highlight' : '' %>" href="/admin/inquiries">
+    <div class="stat-card-icon">📬</div>
+    <div class="stat-card-value"><%= stats.unreadInquiries %></div>
+    <div class="stat-card-label">Unread Messages</div>
+  </a>
+</div>
+
+<div class="panel">
+  <h2 class="panel-title">Quick Actions</h2>
+  <div class="quick-actions">
+    <a href="/admin/catalog/new" class="btn btn-primary">➕ Add New Product</a>
+    <a href="/admin/categories" class="btn btn-outline">🗂️ Manage Categories</a>
+    <a href="/admin/reviews?tab=pending" class="btn btn-outline">⭐ Moderate Reviews</a>
+    <a href="/admin/settings" class="btn btn-outline">⚙️ Edit Site Settings</a>
+  </div>
+</div>
+
+<%- include('partials/foot') %>

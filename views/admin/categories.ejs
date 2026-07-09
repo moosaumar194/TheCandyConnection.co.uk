@@ -1,0 +1,80 @@
+<%- include('partials/head') %>
+
+<div class="panel">
+  <h2 class="panel-title">Add Category</h2>
+  <form method="post" action="/admin/categories/new" enctype="multipart/form-data" class="admin-form inline-add">
+    <div class="form-row">
+      <div class="form-group">
+        <label for="cat-name">Name *</label>
+        <input type="text" id="cat-name" name="name" required placeholder="e.g. Chocolates" />
+      </div>
+      <div class="form-group">
+        <label for="cat-image">Image (optional)</label>
+        <input type="file" id="cat-image" name="image" accept="image/jpeg,image/png,image/webp" />
+      </div>
+      <div class="form-group form-group-btn">
+        <button type="submit" class="btn btn-primary">➕ Add</button>
+      </div>
+    </div>
+  </form>
+</div>
+
+<div class="panel">
+  <div class="panel-head">
+    <h2 class="panel-title">Categories (<%= categories.length %>)</h2>
+    <span class="panel-hint">Use ↑ ↓ to change display order.</span>
+  </div>
+
+  <% if (categories.length === 0) { %>
+    <p class="empty-state">No categories yet. Add one above.</p>
+  <% } else { %>
+    <div class="table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Order</th>
+            <th>Image</th>
+            <th>Name</th>
+            <th>Products</th>
+            <th class="col-actions">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% categories.forEach(function (c, idx) { %>
+            <tr>
+              <td class="reorder-cell">
+                <form method="post" action="/admin/categories/<%= c.id %>/reorder" class="inline-form">
+                  <input type="hidden" name="direction" value="up" />
+                  <button type="submit" class="btn-icon" <%= idx === 0 ? 'disabled' : '' %> aria-label="Move up">↑</button>
+                </form>
+                <form method="post" action="/admin/categories/<%= c.id %>/reorder" class="inline-form">
+                  <input type="hidden" name="direction" value="down" />
+                  <button type="submit" class="btn-icon" <%= idx === categories.length - 1 ? 'disabled' : '' %> aria-label="Move down">↓</button>
+                </form>
+              </td>
+              <td><img class="table-thumb" src="<%= h.imageUrl(c.image_path) %>" alt="<%= c.name %>" /></td>
+              <td>
+                <form method="post" action="/admin/categories/<%= c.id %>/edit" enctype="multipart/form-data" class="cat-edit-form">
+                  <input type="text" name="name" value="<%= c.name %>" required />
+                  <input type="file" name="image" accept="image/jpeg,image/png,image/webp" class="cat-file" title="Replace image" />
+                  <button type="submit" class="btn btn-sm btn-outline">Save</button>
+                </form>
+              </td>
+              <td>
+                <span class="badge <%= c.productCount > 0 ? 'badge-count' : 'badge-muted' %>"><%= c.productCount %></span>
+              </td>
+              <td class="actions-cell">
+                <form method="post" action="/admin/categories/<%= c.id %>/delete" class="inline-form"
+                  data-confirm="<%= c.productCount > 0 ? ('Warning: ' + c.productCount + ' product(s) use this category and will become uncategorised. Delete anyway?') : ('Delete category &quot;' + c.name + '&quot;?') %>">
+                  <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                </form>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+</div>
+
+<%- include('partials/foot') %>
