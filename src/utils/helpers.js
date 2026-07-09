@@ -28,10 +28,11 @@ function displayPrice(price) {
   return String(price);
 }
 
-/** Format an ISO/SQLite datetime string as e.g. "4 Jul 2026". */
+/** Format a datetime as e.g. "4 Jul 2026". Accepts a Date (Postgres TIMESTAMPTZ) or a string. */
 function formatDate(value) {
   if (!value) return '';
-  const d = new Date(String(value).replace(' ', 'T') + 'Z');
+  const d =
+    value instanceof Date ? value : new Date(String(value).replace(' ', 'T') + 'Z');
   if (isNaN(d.getTime())) return String(value);
   return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 }

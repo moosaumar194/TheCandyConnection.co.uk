@@ -14,7 +14,7 @@ const fs = require('fs');
 const crypto = require('crypto');
 const sharp = require('sharp');
 
-const db = require('./database');
+const { all, run: dbRun } = require('./database');
 const { MAX_DIM, WEBP_QUALITY } = require('../middleware/upload');
 
 const PUBLIC = path.join(__dirname, '..', '..', 'public');
@@ -65,16 +65,16 @@ async function run() {
   let totalNew = 0;
 
   for (const table of ['products', 'categories']) {
-    const rows = db
-      .prepare(`SELECT id, image_path FROM ${table} WHERE image_path IS NOT NULL AND image_path != ''`)
-      .all();
+    const rows = await all(
+      `SELECT id, image_path FROM ${table} WHERE image_path IS NOT NULL AND image_path != ''`
+    );
 
     for (const row of rows) {
       const plan = await planOptimize(row.image_path);
       if (!plan) continue;
 
       // Point the DB at the new file BEFORE deleting the old one.
-      db.prepare(`UPDATE ${table} SET image_path = ? WHERE id = ?`).run(plan.newWebPath, row.id);
+      await dbRun(`UPDATE ${table} SET image_path = $1 WHERE id = $2`, [plan.newWebPath, row.id]);
       if (plan.absOld !== plan.absNew) {
         try { fs.unlinkSync(plan.absOld); } catch { /* ignore */ }
       }

@@ -1,5 +1,5 @@
 /** Products data access. */
-const db = require('../db/database');
+const { all, get, run } = require('../db/database');
 
 /**
  * List products.
@@ -7,75 +7,73 @@ const db = require('../db/database');
  * @param {boolean} [opts.visibleOnly] - only is_visible = 1 (public catalog).
  * @param {string}  [opts.category]    - filter by category name.
  */
-function list({ visibleOnly = false, category = null } = {}) {
+async function list({ visibleOnly = false, category = null } = {}) {
   const where = [];
-  const params = {};
+  const params = [];
   if (visibleOnly) where.push('is_visible = 1');
   if (category) {
-    where.push('category = @category');
-    params.category = category;
+    params.push(category);
+    where.push(`category = $${params.length}`);
   }
   const sql =
     'SELECT * FROM products' +
     (where.length ? ' WHERE ' + where.join(' AND ') : '') +
     ' ORDER BY created_at DESC, id DESC';
-  return db.prepare(sql).all(params);
+  return all(sql, params);
 }
 
 function getById(id) {
-  return db.prepare('SELECT * FROM products WHERE id = ?').get(id);
+  return get('SELECT * FROM products WHERE id = $1', [id]);
 }
 
 function create({ name, category, description, price, packaging, image_path, is_visible = 1 }) {
-  const info = db
-    .prepare(
-      `INSERT INTO products (name, category, description, price, packaging, image_path, is_visible)
-       VALUES (@name, @category, @description, @price, @packaging, @image_path, @is_visible)`
-    )
-    .run({
+  return get(
+    `INSERT INTO products (name, category, description, price, packaging, image_path, is_visible)
+     VALUES ($1, $2, $3, $4, $5, $6, $7)
+     RETURNING *`,
+    [
       name,
-      category: category ?? null,
-      description: description ?? null,
-      price: price ?? null,
-      packaging: packaging ?? null,
-      image_path: image_path ?? null,
-      is_visible: is_visible ? 1 : 0,
-    });
-  return getById(info.lastInsertRowid);
+      category ?? null,
+      description ?? null,
+      price ?? null,
+      packaging ?? null,
+      image_path ?? null,
+      is_visible ? 1 : 0,
+    ]
+  );
 }
 
-function update(id, fields) {
-  const current = getById(id);
+async function update(id, fields) {
+  const current = await getById(id);
   if (!current) return null;
-  const merged = {
-    name: fields.name ?? current.name,
-    category: fields.category !== undefined ? fields.category : current.category,
-    description: fields.description !== undefined ? fields.description : current.description,
-    price: fields.price !== undefined ? fields.price : current.price,
-    packaging: fields.packaging !== undefined ? fields.packaging : current.packaging,
-    image_path: fields.image_path !== undefined ? fields.image_path : current.image_path,
-    is_visible: fields.is_visible !== undefined ? (fields.is_visible ? 1 : 0) : current.is_visible,
-    id,
-  };
-  db.prepare(
-    `UPDATE products SET name=@name, category=@category, description=@description,
-       price=@price, packaging=@packaging, image_path=@image_path, is_visible=@is_visible
-     WHERE id=@id`
-  ).run(merged);
-  return getById(id);
+  return get(
+    `UPDATE products SET name=$1, category=$2, description=$3, price=$4,
+       packaging=$5, image_path=$6, is_visible=$7
+     WHERE id=$8 RETURNING *`,
+    [
+      fields.name ?? current.name,
+      fields.category !== undefined ? fields.category : current.category,
+      fields.description !== undefined ? fields.description : current.description,
+      fields.price !== undefined ? fields.price : current.price,
+      fields.packaging !== undefined ? fields.packaging : current.packaging,
+      fields.image_path !== undefined ? fields.image_path : current.image_path,
+      fields.is_visible !== undefined ? (fields.is_visible ? 1 : 0) : current.is_visible,
+      id,
+    ]
+  );
 }
 
 function setVisible(id, visible) {
-  db.prepare('UPDATE products SET is_visible = ? WHERE id = ?').run(visible ? 1 : 0, id);
-  return getById(id);
+  return get('UPDATE products SET is_visible = $1 WHERE id = $2 RETURNING *', [visible ? 1 : 0, id]);
 }
 
 function remove(id) {
-  return db.prepare('DELETE FROM products WHERE id = ?').run(id);
+  return run('DELETE FROM products WHERE id = $1', [id]);
 }
 
-function count() {
-  return db.prepare('SELECT COUNT(*) AS c FROM products').get().c;
+async function count() {
+  const row = await get('SELECT COUNT(*)::int AS c FROM products');
+  return row.c;
 }
 
 module.exports = { list, getById, create, update, setVisible, remove, count };

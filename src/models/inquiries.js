@@ -1,32 +1,32 @@
 /** Contact-form inquiries data access (admin Inbox). */
-const db = require('../db/database');
+const { all, get, run } = require('../db/database');
 
 function list() {
-  return db.prepare('SELECT * FROM inquiries ORDER BY created_at DESC, id DESC').all();
+  return all('SELECT * FROM inquiries ORDER BY created_at DESC, id DESC');
 }
 
 function getById(id) {
-  return db.prepare('SELECT * FROM inquiries WHERE id = ?').get(id);
+  return get('SELECT * FROM inquiries WHERE id = $1', [id]);
 }
 
 function create({ name, email, phone, message }) {
-  const info = db
-    .prepare('INSERT INTO inquiries (name, email, phone, message) VALUES (?, ?, ?, ?)')
-    .run(name, email ?? null, phone ?? null, message);
-  return getById(info.lastInsertRowid);
+  return get(
+    'INSERT INTO inquiries (name, email, phone, message) VALUES ($1, $2, $3, $4) RETURNING *',
+    [name, email ?? null, phone ?? null, message]
+  );
 }
 
 function markRead(id, read = true) {
-  db.prepare('UPDATE inquiries SET is_read = ? WHERE id = ?').run(read ? 1 : 0, id);
-  return getById(id);
+  return get('UPDATE inquiries SET is_read = $1 WHERE id = $2 RETURNING *', [read ? 1 : 0, id]);
 }
 
 function remove(id) {
-  return db.prepare('DELETE FROM inquiries WHERE id = ?').run(id);
+  return run('DELETE FROM inquiries WHERE id = $1', [id]);
 }
 
-function countUnread() {
-  return db.prepare('SELECT COUNT(*) AS c FROM inquiries WHERE is_read = 0').get().c;
+async function countUnread() {
+  const row = await get('SELECT COUNT(*)::int AS c FROM inquiries WHERE is_read = 0');
+  return row.c;
 }
 
 module.exports = { list, getById, create, markRead, remove, countUnread };

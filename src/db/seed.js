@@ -10,7 +10,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const db = require('./database');
+const { run, get, applySchema } = require('./database');
 const users = require('../models/users');
 const settings = require('../models/settings');
 
@@ -152,56 +152,54 @@ const products = [
 // Seeding
 // ---------------------------------------------------------------------------
 
-function wipe() {
-  db.exec(`
-    DELETE FROM products;
-    DELETE FROM categories;
-    DELETE FROM reviews;
-    DELETE FROM site_settings;
-    DELETE FROM admin_users;
-    DELETE FROM inquiries;
-    DELETE FROM sqlite_sequence;
-  `);
+async function wipe() {
+  await run(
+    'TRUNCATE products, categories, reviews, site_settings, admin_users, inquiries RESTART IDENTITY CASCADE'
+  );
 }
 
-function alreadySeeded() {
-  const c = db.prepare('SELECT COUNT(*) AS c FROM admin_users').get().c;
-  return c > 0;
+async function alreadySeeded() {
+  const row = await get('SELECT COUNT(*)::int AS c FROM admin_users');
+  return row.c > 0;
 }
 
-function seed() {
+async function seed() {
+  await applySchema();
+
   if (RESET) {
     console.log('⚠  --reset: wiping all existing data…');
-    wipe();
-  } else if (alreadySeeded()) {
+    await wipe();
+  } else if (await alreadySeeded()) {
     console.log('ℹ  Database already has data — nothing to seed.');
     console.log('   Run "npm run reset" to wipe and re-seed from scratch.');
     return;
   }
 
-  const insertCategory = db.prepare(
-    'INSERT INTO categories (name, image_path, sort_order) VALUES (?, ?, ?)'
-  );
-  categories.forEach((cat, i) => {
+  for (let i = 0; i < categories.length; i++) {
+    const cat = categories[i];
     const img = writeSvg(
       `category-${cat.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}.svg`,
       candySvg({ ...cat.theme, label: cat.name, shape: cat.shape })
     );
-    insertCategory.run(cat.name, img, i + 1);
-  });
+    await run('INSERT INTO categories (name, image_path, sort_order) VALUES ($1, $2, $3)', [
+      cat.name,
+      img,
+      i + 1,
+    ]);
+  }
   console.log(`✓ Inserted ${categories.length} categories`);
 
-  const insertProduct = db.prepare(
-    `INSERT INTO products (name, category, description, price, packaging, image_path, is_visible)
-     VALUES (?, ?, ?, ?, ?, ?, 1)`
-  );
-  products.forEach((p) => {
+  for (const p of products) {
     const img = writeSvg(
       `product-${p.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}.svg`,
       candySvg({ ...p.theme, label: p.name.split(' ').slice(-1)[0], shape: p.shape })
     );
-    insertProduct.run(p.name, p.category, p.description, p.price, p.packaging, img);
-  });
+    await run(
+      `INSERT INTO products (name, category, description, price, packaging, image_path, is_visible)
+       VALUES ($1, $2, $3, $4, $5, $6, 1)`,
+      [p.name, p.category, p.description, p.price, p.packaging, img]
+    );
+  }
   console.log(`✓ Inserted ${products.length} products`);
 
   // A few approved sample reviews so the Reviews page isn't empty.
@@ -215,29 +213,35 @@ function seed() {
     { customer_name: 'The Sweet Kiosk', email: 'kiosk@example.com', rating: 5, is_verified: 1,
       review_text: 'Reliable bulk supplier for our pick-and-mix counter. The sour rainbow straws are our top seller.' },
   ];
-  const insertReview = db.prepare(
-    `INSERT INTO reviews (customer_name, email, rating, review_text, status, is_verified)
-     VALUES (?, ?, ?, ?, 'approved', ?)`
-  );
-  sampleReviews.forEach((r) =>
-    insertReview.run(r.customer_name, r.email, r.rating, r.review_text, r.is_verified)
-  );
+  for (const r of sampleReviews) {
+    await run(
+      `INSERT INTO reviews (customer_name, email, rating, review_text, status, is_verified)
+       VALUES ($1, $2, $3, $4, 'approved', $5)`,
+      [r.customer_name, r.email, r.rating, r.review_text, r.is_verified]
+    );
+  }
   // One pending review to demonstrate the moderation flow.
-  db.prepare(
+  await run(
     `INSERT INTO reviews (customer_name, email, rating, review_text, status, is_verified)
-     VALUES (?, ?, ?, ?, 'pending', 0)`
-  ).run('New Customer', 'new@example.com', 5, 'Just placed my first bulk order — excited to see it arrive!');
+     VALUES ($1, $2, $3, $4, 'pending', 0)`,
+    ['New Customer', 'new@example.com', 5, 'Just placed my first bulk order — excited to see it arrive!']
+  );
   console.log(`✓ Inserted ${sampleReviews.length} approved + 1 pending review`);
 
   // Site settings (placeholders — editable in Admin → Site Settings).
-  settings.setMany(settings.DEFAULTS);
+  await settings.setMany(settings.DEFAULTS);
   console.log('✓ Inserted default site settings');
 
   // Default admin account (forced password change on first login).
-  users.create({ username: 'admin', password: 'letmein123', must_change_password: 1 });
+  await users.create({ username: 'admin', password: 'letmein123', must_change_password: 1 });
   console.log('✓ Created admin user  (username: admin  password: letmein123)');
 
   console.log('\n🍬 Seed complete!  Start the app with:  npm start');
 }
 
-seed();
+seed()
+  .then(() => process.exit(0))
+  .catch((err) => {
+    console.error('Seed failed:', err);
+    process.exit(1);
+  });

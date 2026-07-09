@@ -1,51 +1,46 @@
 /** Categories data access. */
-const db = require('../db/database');
+const { all, get, run } = require('../db/database');
 
 /** All categories ordered by sort_order then name. */
 function listOrdered() {
-  return db
-    .prepare('SELECT * FROM categories ORDER BY sort_order ASC, name ASC')
-    .all();
+  return all('SELECT * FROM categories ORDER BY sort_order ASC, name ASC');
 }
 
 function getById(id) {
-  return db.prepare('SELECT * FROM categories WHERE id = ?').get(id);
+  return get('SELECT * FROM categories WHERE id = $1', [id]);
 }
 
 function getByName(name) {
-  return db.prepare('SELECT * FROM categories WHERE name = ?').get(name);
+  return get('SELECT * FROM categories WHERE name = $1', [name]);
 }
 
 /** Create a category; new ones sort after existing ones by default. */
-function create({ name, image_path = null }) {
-  const maxRow = db.prepare('SELECT MAX(sort_order) AS max FROM categories').get();
-  const nextOrder = (maxRow.max ?? 0) + 1;
-  const info = db
-    .prepare('INSERT INTO categories (name, image_path, sort_order) VALUES (?, ?, ?)')
-    .run(name, image_path, nextOrder);
-  return getById(info.lastInsertRowid);
+async function create({ name, image_path = null }) {
+  const maxRow = await get('SELECT COALESCE(MAX(sort_order), 0) AS max FROM categories');
+  const nextOrder = maxRow.max + 1;
+  return get(
+    'INSERT INTO categories (name, image_path, sort_order) VALUES ($1, $2, $3) RETURNING *',
+    [name, image_path, nextOrder]
+  );
 }
 
-function update(id, { name, image_path }) {
-  const current = getById(id);
+async function update(id, { name, image_path }) {
+  const current = await getById(id);
   if (!current) return null;
-  db.prepare('UPDATE categories SET name = ?, image_path = ? WHERE id = ?').run(
+  return get('UPDATE categories SET name = $1, image_path = $2 WHERE id = $3 RETURNING *', [
     name ?? current.name,
     image_path !== undefined ? image_path : current.image_path,
-    id
-  );
-  return getById(id);
+    id,
+  ]);
 }
 
 function remove(id) {
-  return db.prepare('DELETE FROM categories WHERE id = ?').run(id);
+  return run('DELETE FROM categories WHERE id = $1', [id]);
 }
 
 /** Number of products currently assigned to a category name. */
-function productCount(name) {
-  const row = db
-    .prepare('SELECT COUNT(*) AS c FROM products WHERE category = ?')
-    .get(name);
+async function productCount(name) {
+  const row = await get('SELECT COUNT(*)::int AS c FROM products WHERE category = $1', [name]);
   return row.c;
 }
 
@@ -53,8 +48,8 @@ function productCount(name) {
  * Move a category up or down by swapping sort_order with its neighbour.
  * direction: 'up' | 'down'.
  */
-const reorder = db.transaction((id, direction) => {
-  const list = listOrdered();
+async function reorder(id, direction) {
+  const list = await listOrdered();
   const index = list.findIndex((c) => c.id === Number(id));
   if (index === -1) return;
   const swapIndex = direction === 'up' ? index - 1 : index + 1;
@@ -62,10 +57,9 @@ const reorder = db.transaction((id, direction) => {
 
   const a = list[index];
   const b = list[swapIndex];
-  const stmt = db.prepare('UPDATE categories SET sort_order = ? WHERE id = ?');
-  stmt.run(b.sort_order, a.id);
-  stmt.run(a.sort_order, b.id);
-});
+  await run('UPDATE categories SET sort_order = $1 WHERE id = $2', [b.sort_order, a.id]);
+  await run('UPDATE categories SET sort_order = $1 WHERE id = $2', [a.sort_order, b.id]);
+}
 
 module.exports = {
   listOrdered,

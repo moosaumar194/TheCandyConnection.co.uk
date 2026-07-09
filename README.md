@@ -23,13 +23,13 @@ catalog, categories, reviews, contact settings, and a contact-form inbox.
 
 ## 🧰 Tech Stack
 
-| Layer      | Choice                                        |
-|------------|-----------------------------------------------|
-| Server     | Node.js + Express                             |
-| Views      | EJS (server-rendered) + vanilla JS            |
-| Database   | SQLite via `better-sqlite3`                   |
-| Auth       | `express-session` + `bcryptjs`                |
-| Uploads    | `multer` (JPG/PNG/WEBP, 5 MB max)             |
+| Layer      | Choice                                                        |
+|------------|---------------------------------------------------------------|
+| Server     | Node.js + Express (serverless on Vercel via `api/index.js`)    |
+| Views      | EJS (server-rendered) + vanilla JS                            |
+| Database   | PostgreSQL via `pg` (Vercel Postgres / Neon)                  |
+| Auth       | `cookie-session` (stateless) + `bcryptjs`                     |
+| Uploads    | `multer` + `sharp` → **Vercel Blob** (disk fallback in dev)   |
 
 ---
 
@@ -37,6 +37,9 @@ catalog, categories, reviews, contact settings, and a contact-form inbox.
 
 ### Prerequisites
 - **Node.js 18+** and npm.
+- A **PostgreSQL** database. For local dev this can be your cloud Postgres (Vercel
+  Postgres / Neon) connection string, or a local one — e.g. via Docker:
+  `docker run --name candy-pg -e POSTGRES_PASSWORD=candy -e POSTGRES_DB=candy -p 5432:5432 -d postgres:16`
 
 ### Setup
 
@@ -44,10 +47,11 @@ catalog, categories, reviews, contact settings, and a contact-form inbox.
 # 1. Install dependencies
 npm install
 
-# 2. (Optional) create your env file
-cp .env.example .env        # then edit PORT / SESSION_SECRET
+# 2. Create your env file and set POSTGRES_URL (+ SESSION_SECRET)
+cp .env.example .env
+#   e.g. POSTGRES_URL=postgres://postgres:candy@localhost:5432/candy
 
-# 3. Seed the database (creates data/candy.db + sample data + admin user)
+# 3. Seed the database (creates tables + sample data + admin user)
 npm run seed
 
 # 4. Start the server
@@ -57,6 +61,8 @@ npm start
 Then open **http://localhost:3000**.
 
 > `npm run dev` starts the server with auto-reload (`node --watch`).
+> Without a `BLOB_READ_WRITE_TOKEN`, admin image uploads are written to
+> `public/uploads/` on disk (fine for local dev).
 
 ### Re-seeding
 
@@ -105,30 +111,54 @@ https://wa.me/<digits-only-number>?text=<url-encoded message>
 ## 🗂️ Project Structure
 
 ```
-├─ server.js               # Express bootstrap
+├─ server.js               # Express app (exported; listens only in local dev)
+├─ api/index.js            # Vercel serverless entrypoint (imports server.js)
+├─ vercel.json             # rewrites all routes to the function
 ├─ src/
-│  ├─ db/                  # database.js, schema.sql, seed.js
-│  ├─ middleware/          # auth.js, upload.js
-│  ├─ models/              # products, categories, reviews, settings, inquiries, users
+│  ├─ db/                  # database.js (pg), schema.sql, seed.js, optimize-images.js,
+│  │                       #   migrate-to-postgres.js
+│  ├─ middleware/          # auth.js, upload.js (sharp → Vercel Blob / disk)
+│  ├─ models/              # products, categories, reviews, settings, inquiries, users (async)
 │  ├─ routes/              # public.js, api.js, admin.js
-│  └─ utils/               # whatsapp.js, helpers.js
+│  └─ utils/               # whatsapp.js, helpers.js, asyncHandler.js
 ├─ views/                  # EJS templates (+ partials, + admin/)
 ├─ public/                 # css/, js/, images/, uploads/, favicon.svg
-└─ data/                   # candy.db (generated, gitignored)
+└─ data/                   # candy.db (old SQLite — migration source only, gitignored)
 ```
+
+---
+
+## ▲ Deploy to Vercel
+
+The app is serverless-ready (stateless sessions, Postgres, Blob storage).
+
+1. **Create storage in the Vercel dashboard** (project → Storage):
+   - a **Postgres** database → it injects `POSTGRES_URL` (+ related vars).
+   - a **Blob** store → gives you `BLOB_READ_WRITE_TOKEN`.
+2. **Set env vars** on the Vercel project (and in a local `.env`): `POSTGRES_URL`,
+   `BLOB_READ_WRITE_TOKEN`, a strong `SESSION_SECRET`, and `NODE_ENV=production`.
+3. **Migrate your existing data** once, locally (uploads its images to Blob):
+   ```bash
+   npm run migrate
+   ```
+   (Or start fresh on Postgres with `npm run seed`.)
+4. **Import the GitHub repo** into Vercel. The Git integration enables
+   **auto-deploy: every push to `main` triggers a new deployment**.
+
+Static assets in `public/` are served by Vercel automatically; everything else is
+routed to the Express function via `vercel.json`.
 
 ---
 
 ## 🛠️ Troubleshooting
 
-- **`better-sqlite3` fails to install / build on Windows:** it ships prebuilt binaries for
-  Node LTS, so `npm install` normally just works. If it tries to compile and fails, install the
-  build tools (`npm install --global windows-build-tools` on older setups, or install
-  "Desktop development with C++" via Visual Studio Build Tools) and re-run `npm install`, or
-  switch to a Node LTS version (18/20/22).
+- **`error: POSTGRES_URL is not set`:** create `.env` from `.env.example` and set a Postgres
+  connection string (see Prerequisites for a Docker one-liner).
+- **Connecting to Vercel Postgres / Neon locally:** use the **pooled** connection string; SSL is
+  enabled automatically for non-localhost hosts.
 - **Port already in use:** set a different `PORT` in `.env`.
-- **Uploaded images not showing:** ensure `public/uploads/products` and
-  `public/uploads/categories` exist (they're created automatically on first upload/seed).
+- **Uploads:** with `BLOB_READ_WRITE_TOKEN` set they go to Vercel Blob; otherwise to
+  `public/uploads/` on disk (auto-created).
 
 ---
 
@@ -136,8 +166,8 @@ https://wa.me/<digits-only-number>?text=<url-encoded message>
 
 - This project intentionally contains **no e-commerce** (cart/checkout/payment). WhatsApp is
   the only ordering channel.
-- Sessions use the default in-memory store, so restarting the server logs admins out — fine for
-  this MVP. For production, add a persistent session store and run behind HTTPS with
-  `NODE_ENV=production` (enables secure cookies).
+- Admin sessions are **stateless signed cookies** (`cookie-session`) — serverless-safe and
+  persistent across restarts/instances. Set a strong `SESSION_SECRET`, and `NODE_ENV=production`
+  behind HTTPS to enable secure cookies.
 
 © 2026 The Candy Connection.

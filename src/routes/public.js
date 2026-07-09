@@ -5,36 +5,45 @@ const router = express.Router();
 const Products = require('../models/products');
 const Categories = require('../models/categories');
 const Reviews = require('../models/reviews');
+const ah = require('../utils/asyncHandler');
 
 // Home
-router.get('/', (req, res) => {
-  const categories = Categories.listOrdered();
-  res.render('home', {
-    title: 'The Candy Connection — Sweet Deals. Bulk Delights.',
-    metaDescription:
-      'The Candy Connection — your bulk candy wholesale supplier. Browse our catalog and order in bulk via WhatsApp.',
-    activeNav: 'home',
-    featuredCategories: categories.slice(0, 6),
-  });
-});
+router.get(
+  '/',
+  ah(async (req, res) => {
+    const categories = await Categories.listOrdered();
+    res.render('home', {
+      title: 'The Candy Connection — Sweet Deals. Bulk Delights.',
+      metaDescription:
+        'The Candy Connection — your bulk candy wholesale supplier. Browse our catalog and order in bulk via WhatsApp.',
+      activeNav: 'home',
+      featuredCategories: categories.slice(0, 6),
+    });
+  })
+);
 
 // Catalog (view-only)
-router.get('/catalog', (req, res) => {
-  const categories = Categories.listOrdered();
-  const products = Products.list({ visibleOnly: true });
-  const selectedCategory = req.query.category || 'All';
-  res.render('catalog', {
-    title: 'Our Candy Collection — The Candy Connection',
-    metaDescription:
-      'Browse The Candy Connection catalog of bulk sweets, chocolates, gummies and lollipops. Inquire on WhatsApp for wholesale pricing.',
-    activeNav: 'catalog',
-    categories,
-    products,
-    selectedCategory,
-  });
-});
+router.get(
+  '/catalog',
+  ah(async (req, res) => {
+    const [categories, products] = await Promise.all([
+      Categories.listOrdered(),
+      Products.list({ visibleOnly: true }),
+    ]);
+    const selectedCategory = req.query.category || 'All';
+    res.render('catalog', {
+      title: 'Our Candy Collection — The Candy Connection',
+      metaDescription:
+        'Browse The Candy Connection catalog of bulk sweets, chocolates, gummies and lollipops. Inquire on WhatsApp for wholesale pricing.',
+      activeNav: 'catalog',
+      categories,
+      products,
+      selectedCategory,
+    });
+  })
+);
 
-// Contact
+// Contact (no DB reads)
 router.get('/contact', (req, res) => {
   res.render('contact', {
     title: 'Contact Us — The Candy Connection',
@@ -46,15 +55,19 @@ router.get('/contact', (req, res) => {
 });
 
 // Reviews
-router.get('/reviews', (req, res) => {
-  res.render('reviews', {
-    title: 'Customer Reviews — The Candy Connection',
-    metaDescription: 'See what our wholesale candy customers say about The Candy Connection.',
-    activeNav: 'reviews',
-    reviews: Reviews.listApproved(),
-    stats: Reviews.stats(),
-    submitted: req.query.submitted === '1',
-  });
-});
+router.get(
+  '/reviews',
+  ah(async (req, res) => {
+    const [reviews, stats] = await Promise.all([Reviews.listApproved(), Reviews.stats()]);
+    res.render('reviews', {
+      title: 'Customer Reviews — The Candy Connection',
+      metaDescription: 'See what our wholesale candy customers say about The Candy Connection.',
+      activeNav: 'reviews',
+      reviews,
+      stats,
+      submitted: req.query.submitted === '1',
+    });
+  })
+);
 
 module.exports = router;

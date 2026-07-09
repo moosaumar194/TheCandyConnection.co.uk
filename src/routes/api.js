@@ -4,11 +4,12 @@ const router = express.Router();
 
 const Reviews = require('../models/reviews');
 const Inquiries = require('../models/inquiries');
+const ah = require('../utils/asyncHandler');
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 // Submit a review -> stored as 'pending' for admin approval.
-router.post('/reviews', (req, res) => {
+router.post('/reviews', ah(async (req, res) => {
   const name = (req.body.customer_name || req.body.name || '').trim();
   const email = (req.body.email || '').trim();
   const rating = parseInt(req.body.rating, 10);
@@ -24,15 +25,15 @@ router.post('/reviews', (req, res) => {
     return res.status(400).json({ ok: false, errors });
   }
 
-  Reviews.create({ customer_name: name, email, rating, review_text: text });
+  await Reviews.create({ customer_name: name, email, rating, review_text: text });
   return res.json({
     ok: true,
     message: 'Thank you! Your review is awaiting approval.',
   });
-});
+}));
 
 // Submit a contact inquiry -> stored in the admin Inbox.
-router.post('/contact', (req, res) => {
+router.post('/contact', ah(async (req, res) => {
   const name = (req.body.name || '').trim();
   const email = (req.body.email || '').trim();
   const phone = (req.body.phone || '').trim();
@@ -47,8 +48,8 @@ router.post('/contact', (req, res) => {
     return res.status(400).json({ ok: false, errors });
   }
 
-  Inquiries.create({ name, email, phone, message });
+  await Inquiries.create({ name, email, phone, message });
   return res.json({ ok: true, message: "Thanks! We'll contact you soon." });
-});
+}));
 
 module.exports = router;
