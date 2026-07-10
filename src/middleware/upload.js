@@ -39,11 +39,17 @@ async function storeImage(buffer, subfolder, mimetype) {
   const filename = `${Date.now()}-${crypto.randomBytes(8).toString('hex')}${ext}`;
 
   if (useBlob()) {
+    const tok = blobToken();
+    const raw = process.env.BLOB_READ_WRITE_TOKEN || '';
+    // Safe fingerprint (no secret exposed): helps diagnose a wrong/corrupted env value.
+    console.log(
+      `[upload] blob token check: len=${tok.length} head=${tok.slice(0, 15)} tail=${tok.slice(-4)} rawLen=${raw.length} rawQuoted=${/^["']|["']$/.test(raw.trim())}`
+    );
     const blob = await put(`${subfolder}/${filename}`, buffer, {
       access: 'public',
       contentType: mimetype,
       addRandomSuffix: false,
-      token: blobToken(),
+      token: tok,
     });
     return blob.url;
   }
