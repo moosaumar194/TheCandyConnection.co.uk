@@ -40,6 +40,14 @@ async function storeImage(buffer, subfolder, mimetype) {
     return blob.url;
   }
 
+  // No Blob token. On Vercel the filesystem is read-only, so a disk write would
+  // fail with EROFS — surface a clear, actionable error instead.
+  if (process.env.VERCEL) {
+    throw new Error(
+      'BLOB_READ_WRITE_TOKEN is not set on this deployment — add the Vercel Blob token in the project environment variables so uploads can be stored.'
+    );
+  }
+
   const destDir = path.join(UPLOAD_ROOT, subfolder);
   fs.mkdirSync(destDir, { recursive: true });
   fs.writeFileSync(path.join(destDir, filename), buffer);
@@ -69,7 +77,10 @@ function makeUploader(subfolder) {
               req.file.url = url;
               next();
             })
-            .catch(() => next(new Error('Could not process the uploaded image.')));
+            .catch((err) => {
+              console.error('[upload] failed to store image:', err && err.message ? err.message : err);
+              next(new Error('Could not process the uploaded image.'));
+            });
         });
       };
     },
