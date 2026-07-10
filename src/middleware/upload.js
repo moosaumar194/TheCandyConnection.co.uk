@@ -24,7 +24,14 @@ const EXT_BY_MIME = {
   'image/webp': '.webp',
 };
 
-const useBlob = () => !!process.env.BLOB_READ_WRITE_TOKEN;
+/**
+ * Read the Blob token, tolerating accidental surrounding quotes/whitespace
+ * (a common env-var paste mistake — quotes are never part of a real token).
+ */
+function blobToken() {
+  return (process.env.BLOB_READ_WRITE_TOKEN || '').trim().replace(/^["']|["']$/g, '').trim();
+}
+const useBlob = () => blobToken().length > 0;
 
 /** Store an uploaded image as-is; returns its public URL (Blob) or web path (disk). */
 async function storeImage(buffer, subfolder, mimetype) {
@@ -36,6 +43,7 @@ async function storeImage(buffer, subfolder, mimetype) {
       access: 'public',
       contentType: mimetype,
       addRandomSuffix: false,
+      token: blobToken(),
     });
     return blob.url;
   }
@@ -93,7 +101,7 @@ async function deleteImage(url) {
   if (/^https?:\/\//i.test(url)) {
     if (useBlob()) {
       try {
-        await del(url);
+        await del(url, { token: blobToken() });
       } catch {
         /* ignore */
       }
