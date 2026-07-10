@@ -7,6 +7,7 @@
  * Also (re)generates candy-themed sample SVG images under
  * public/images/samples/ so the catalog looks populated with no binary assets.
  */
+require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
 
@@ -116,36 +117,56 @@ const categories = [
 ];
 
 const products = [
-  { name: 'Milk Chocolate Truffles', category: 'Chocolates', price: '18.50', packaging: 'Box of 24', shape: 'wrapped',
+  {
+    name: 'Milk Chocolate Truffles', category: 'Chocolates', price: '18.50', packaging: 'Box of 24', shape: 'wrapped',
     theme: { bg1: '#FFE9D6', bg2: '#E9B98A', candy: '#8B5A2B', accent: '#D9A76A' },
-    description: 'Creamy milk chocolate truffles with a smooth ganache centre. Perfect for gift boxes and reselling by the dozen.' },
-  { name: 'Dark Chocolate Bars', category: 'Chocolates', price: '', packaging: '100g Bar · Case of 40', shape: 'bar',
+    description: 'Creamy milk chocolate truffles with a smooth ganache centre. Perfect for gift boxes and reselling by the dozen.'
+  },
+  {
+    name: 'Dark Chocolate Bars', category: 'Chocolates', price: '', packaging: '100g Bar · Case of 40', shape: 'bar',
     theme: { bg1: '#F3E1CF', bg2: '#C98A4B', candy: '#4A2C17', accent: '#8B5A2B' },
-    description: 'Rich 70% dark chocolate bars, individually wrapped. Bulk cases available — contact us for wholesale pricing.' },
-  { name: 'Caramel Fudge Cubes', category: 'Chocolates', price: '12.00', packaging: '500g Pack', shape: 'wrapped',
+    description: 'Rich 70% dark chocolate bars, individually wrapped. Bulk cases available — contact us for wholesale pricing.'
+  },
+  {
+    name: 'Caramel Fudge Cubes', category: 'Chocolates', price: '12.00', packaging: '500g Pack', shape: 'wrapped',
     theme: { bg1: '#FFF0DC', bg2: '#F0C27B', candy: '#B5762E', accent: '#FFD700' },
-    description: 'Soft, buttery caramel fudge cubes dusted to prevent sticking. A best-selling counter treat.' },
-  { name: 'Fruit Gummy Bears', category: 'Gummies & Jellies', price: '9.50', packaging: '1kg Bag', shape: 'gummy',
+    description: 'Soft, buttery caramel fudge cubes dusted to prevent sticking. A best-selling counter treat.'
+  },
+  {
+    name: 'Fruit Gummy Bears', category: 'Gummies & Jellies', price: '9.50', packaging: '1kg Bag', shape: 'gummy',
     theme: { bg1: '#FFD9E6', bg2: '#FFB6C1', candy: '#FF5C8A', accent: '#FFD700' },
-    description: 'Classic assorted fruit gummy bears in five fruity flavours. Sold in resealable bulk bags.' },
-  { name: 'Rainbow Jelly Worms', category: 'Gummies & Jellies', price: '', packaging: '2kg Tub', shape: 'jelly',
+    description: 'Classic assorted fruit gummy bears in five fruity flavours. Sold in resealable bulk bags.'
+  },
+  {
+    name: 'Rainbow Jelly Worms', category: 'Gummies & Jellies', price: '', packaging: '2kg Tub', shape: 'jelly',
     theme: { bg1: '#E8D6FF', bg2: '#C6A6FF', candy: '#8A5CFF', accent: '#FF7AA8' },
-    description: 'Long, chewy two-tone jelly worms that kids love. Price on request for wholesale tubs.' },
-  { name: 'Fizzy Cola Bottles', category: 'Gummies & Jellies', price: '10.25', packaging: '1kg Bag', shape: 'gummy',
+    description: 'Long, chewy two-tone jelly worms that kids love. Price on request for wholesale tubs.'
+  },
+  {
+    name: 'Fizzy Cola Bottles', category: 'Gummies & Jellies', price: '10.25', packaging: '1kg Bag', shape: 'gummy',
     theme: { bg1: '#FBE6C9', bg2: '#E0A96D', candy: '#6B3E1D', accent: '#FFD700' },
-    description: 'Tangy fizzy cola bottle gummies coated in sour sugar. A pick-and-mix essential.' },
-  { name: 'Classic Lollipops', category: 'Hard Candy & Lollipops', price: '0.35', packaging: 'Each · Tub of 200', shape: 'lollipop',
+    description: 'Tangy fizzy cola bottle gummies coated in sour sugar. A pick-and-mix essential.'
+  },
+  {
+    name: 'Classic Lollipops', category: 'Hard Candy & Lollipops', price: '0.35', packaging: 'Each · Tub of 200', shape: 'lollipop',
     theme: { bg1: '#FFE0EC', bg2: '#FF9EC0', candy: '#FF4D8D', accent: '#FFFFFF' },
-    description: 'Swirled rainbow lollipops on a paper stick. Great for events, parties, and party bags.' },
-  { name: 'Peppermint Swirls', category: 'Hard Candy & Lollipops', price: '7.00', packaging: '500g Pack', shape: 'wrapped',
+    description: 'Swirled rainbow lollipops on a paper stick. Great for events, parties, and party bags.'
+  },
+  {
+    name: 'Peppermint Swirls', category: 'Hard Candy & Lollipops', price: '7.00', packaging: '500g Pack', shape: 'wrapped',
     theme: { bg1: '#E4FFF0', bg2: '#B6F5D2', candy: '#E23B4E', accent: '#FFFFFF' },
-    description: 'Individually wrapped red-and-white peppermint swirl hard candies. Refreshing after-dinner favourite.' },
-  { name: 'Sour Rainbow Straws', category: 'Sour & Novelty', price: '11.50', packaging: 'Box of 120', shape: 'jelly',
+    description: 'Individually wrapped red-and-white peppermint swirl hard candies. Refreshing after-dinner favourite.'
+  },
+  {
+    name: 'Sour Rainbow Straws', category: 'Sour & Novelty', price: '11.50', packaging: 'Box of 120', shape: 'jelly',
     theme: { bg1: '#FFFBD6', bg2: '#FFF07A', candy: '#8ED14F', accent: '#FF8C42' },
-    description: 'Chewy rainbow straws with an intense sour coating. A novelty counter favourite that flies off shelves.' },
-  { name: 'Novelty Candy Mix', category: 'Sour & Novelty', price: '', packaging: 'Custom Bulk Order', shape: 'wrapped',
+    description: 'Chewy rainbow straws with an intense sour coating. A novelty counter favourite that flies off shelves.'
+  },
+  {
+    name: 'Novelty Candy Mix', category: 'Sour & Novelty', price: '', packaging: 'Custom Bulk Order', shape: 'wrapped',
     theme: { bg1: '#FFE9F5', bg2: '#FFC1E3', candy: '#FF5FA2', accent: '#66D2A0' },
-    description: 'A custom pick-and-mix assortment tailored to your shop. Tell us your mix on WhatsApp for a quote.' },
+    description: 'A custom pick-and-mix assortment tailored to your shop. Tell us your mix on WhatsApp for a quote.'
+  },
 ];
 
 // ---------------------------------------------------------------------------
@@ -204,14 +225,22 @@ async function seed() {
 
   // A few approved sample reviews so the Reviews page isn't empty.
   const sampleReviews = [
-    { customer_name: 'Sana Corner Store', email: 'sana@example.com', rating: 5, is_verified: 1,
-      review_text: 'Best wholesale prices in town and the gummy bears are always fresh. Ordering on WhatsApp is so easy!' },
-    { customer_name: 'Bilal Events', email: 'bilal@example.com', rating: 5, is_verified: 1,
-      review_text: 'Ordered 200 lollipops for a school event — delivered on time and the kids loved them. Highly recommend.' },
-    { customer_name: 'Maya K.', email: 'maya@example.com', rating: 4, is_verified: 0,
-      review_text: 'Great variety and friendly service. Would love to see more sugar-free options in the future.' },
-    { customer_name: 'The Sweet Kiosk', email: 'kiosk@example.com', rating: 5, is_verified: 1,
-      review_text: 'Reliable bulk supplier for our pick-and-mix counter. The sour rainbow straws are our top seller.' },
+    {
+      customer_name: 'Sana Corner Store', email: 'sana@example.com', rating: 5, is_verified: 1,
+      review_text: 'Best wholesale prices in town and the gummy bears are always fresh. Ordering on WhatsApp is so easy!'
+    },
+    {
+      customer_name: 'Bilal Events', email: 'bilal@example.com', rating: 5, is_verified: 1,
+      review_text: 'Ordered 200 lollipops for a school event — delivered on time and the kids loved them. Highly recommend.'
+    },
+    {
+      customer_name: 'Maya K.', email: 'maya@example.com', rating: 4, is_verified: 0,
+      review_text: 'Great variety and friendly service. Would love to see more sugar-free options in the future.'
+    },
+    {
+      customer_name: 'The Sweet Kiosk', email: 'kiosk@example.com', rating: 5, is_verified: 1,
+      review_text: 'Reliable bulk supplier for our pick-and-mix counter. The sour rainbow straws are our top seller.'
+    },
   ];
   for (const r of sampleReviews) {
     await run(

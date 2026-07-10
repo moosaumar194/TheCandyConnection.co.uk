@@ -1,44 +1,40 @@
 /**
- * Image-upload middleware with automatic optimization.
+ * Image-upload middleware.
  *
- * Accepts JPG/PNG/WEBP up to 5MB, resizes (longest side <= MAX_DIM) and
- * re-encodes to WebP via sharp. Stored in Vercel Blob when BLOB_READ_WRITE_TOKEN
- * is set (production), otherwise written to public/uploads/ on disk (local dev).
- * The uploader sets req.file.url to the resulting public URL / path.
+ * Accepts JPG/PNG/WEBP up to 5MB and stores the file AS-IS (no processing) —
+ * to Vercel Blob when BLOB_READ_WRITE_TOKEN is set (production), otherwise to
+ * public/uploads/ on disk (local dev). The uploader sets req.file.url to the
+ * resulting public URL / path.
+ *
+ * Note: image optimization was intentionally removed — `sharp`'s native binary
+ * fails to load in Vercel's serverless runtime, which broke uploads.
  */
 const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
 const multer = require('multer');
-const sharp = require('sharp');
 const { put, del } = require('@vercel/blob');
 
 const UPLOAD_ROOT = path.join(__dirname, '..', '..', 'public', 'uploads');
 const MAX_SIZE = 5 * 1024 * 1024; // 5MB upload cap
-const MAX_DIM = 800; // longest edge after resize (px)
-const WEBP_QUALITY = 80;
 const ALLOWED = new Set(['image/jpeg', 'image/png', 'image/webp']);
+const EXT_BY_MIME = {
+  'image/jpeg': '.jpg',
+  'image/png': '.png',
+  'image/webp': '.webp',
+};
 
 const useBlob = () => !!process.env.BLOB_READ_WRITE_TOKEN;
 
-/** Resize + convert a raw image buffer to an optimized WebP buffer. */
-function optimizeToWebpBuffer(buffer) {
-  return sharp(buffer)
-    .rotate() // honour EXIF orientation before stripping metadata
-    .resize({ width: MAX_DIM, height: MAX_DIM, fit: 'inside', withoutEnlargement: true })
-    .webp({ quality: WEBP_QUALITY })
-    .toBuffer();
-}
-
-/** Optimize + store an image; returns its public URL (Blob) or web path (disk). */
-async function storeImage(buffer, subfolder) {
-  const webp = await optimizeToWebpBuffer(buffer);
-  const filename = `${Date.now()}-${crypto.randomBytes(8).toString('hex')}.webp`;
+/** Store an uploaded image as-is; returns its public URL (Blob) or web path (disk). */
+async function storeImage(buffer, subfolder, mimetype) {
+  const ext = EXT_BY_MIME[mimetype] || '.img';
+  const filename = `${Date.now()}-${crypto.randomBytes(8).toString('hex')}${ext}`;
 
   if (useBlob()) {
-    const blob = await put(`${subfolder}/${filename}`, webp, {
+    const blob = await put(`${subfolder}/${filename}`, buffer, {
       access: 'public',
-      contentType: 'image/webp',
+      contentType: mimetype,
       addRandomSuffix: false,
     });
     return blob.url;
@@ -46,7 +42,7 @@ async function storeImage(buffer, subfolder) {
 
   const destDir = path.join(UPLOAD_ROOT, subfolder);
   fs.mkdirSync(destDir, { recursive: true });
-  fs.writeFileSync(path.join(destDir, filename), webp);
+  fs.writeFileSync(path.join(destDir, filename), buffer);
   return `/uploads/${subfolder}/${filename}`;
 }
 
@@ -61,14 +57,14 @@ function makeUploader(subfolder) {
   });
 
   return {
-    /** Middleware: parse one file field, optimize + store it, set req.file.url. */
+    /** Middleware: parse one file field, store the original buffer, set req.file.url. */
     single(field) {
       const parse = multerInstance.single(field);
       return (req, res, next) => {
         parse(req, res, (err) => {
           if (err) return next(err);
           if (!req.file) return next(); // no file supplied — nothing to store
-          storeImage(req.file.buffer, subfolder)
+          storeImage(req.file.buffer, subfolder, req.file.mimetype)
             .then((url) => {
               req.file.url = url;
               next();
@@ -99,12 +95,4 @@ async function deleteImage(url) {
   }
 }
 
-module.exports = {
-  makeUploader,
-  storeImage,
-  optimizeToWebpBuffer,
-  deleteImage,
-  MAX_SIZE,
-  MAX_DIM,
-  WEBP_QUALITY,
-};
+module.exports = { makeUploader, storeImage, deleteImage, MAX_SIZE };

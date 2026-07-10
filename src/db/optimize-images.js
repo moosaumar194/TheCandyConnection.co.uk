@@ -15,7 +15,11 @@ const crypto = require('crypto');
 const sharp = require('sharp');
 
 const { all, run: dbRun } = require('./database');
-const { MAX_DIM, WEBP_QUALITY } = require('../middleware/upload');
+
+// Local-only maintenance utility (uses the `sharp` devDependency). Never runs on
+// Vercel — the upload pipeline no longer optimizes images.
+const MAX_DIM = 800;
+const WEBP_QUALITY = 80;
 
 const PUBLIC = path.join(__dirname, '..', '..', 'public');
 
